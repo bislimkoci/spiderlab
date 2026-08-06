@@ -14,7 +14,9 @@ while camera.isOpened():
 
     fg_mask = backsub.apply(frame)
 
-    contours, hierarchy = cv2.findContours(fg_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    retval, mask_thresh = cv2.threshold(fg_mask, 180, 255, cv2.THRESH_BINARY)
+
+    contours, hierarchy = cv2.findContours(mask_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     frame_ct = cv2.drawContours(frame, contours, -1, (0, 255,0), 2)
 
