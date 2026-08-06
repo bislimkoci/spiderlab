@@ -1,6 +1,6 @@
 import cv2
 
-MIN_CONTOUR_AREA = 400
+MIN_CONTOUR_AREA = 300
 
 camera = cv2.VideoCapture(0)
 backsub = cv2.createBackgroundSubtractorMOG2()
@@ -24,9 +24,14 @@ while camera.isOpened():
 
     large_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > MIN_CONTOUR_AREA]
 
-    frame_ct = cv2.drawContours(frame, large_contours, -1, (0, 255,0), 2)
+    frame_out = frame.copy()
+    for cnt in large_contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        frame_out = cv2.rectangle(frame, (x,y), (x+w, y+w), (0, 0, 200), 3)
 
-    cv2.imshow('frame', frame_ct)
+    #frame_ct = cv2.drawContours(frame, large_contours, -1, (0, 255,0), 2)
+
+    cv2.imshow('frame', frame_out)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
