@@ -13,7 +13,12 @@ while camera.isOpened():
         break
 
     fg_mask = backsub.apply(frame)
-    cv2.imshow('frame', fg_mask)
+
+    contours, hierarchy = cv2.findContours(fg_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    frame_ct = cv2.drawContours(frame, contours, -1, (0, 255,0), 2)
+
+    cv2.imshow('frame', frame_ct)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
