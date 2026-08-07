@@ -31,7 +31,7 @@ while camera.isOpened():
 
     #frame_ct = cv2.drawContours(frame, large_contours, -1, (0, 255,0), 2)
 
-    cv2.imshow('frame', frame_out)
+    cv2.imshow('frame', mask_eroded)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
