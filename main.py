@@ -1,22 +1,30 @@
 import cv2
-from app.camera import Camera
+
+from app.camera import Camera, CameraError
+from app.config import settings
 from app.processing import VisualDetection
 
-MIN_CONTOUR_AREA = 300
 
-camera = Camera()
-processing = VisualDetection(MIN_CONTOUR_AREA)
+def main() -> None:
+    camera = Camera(settings.camera)
+    processing = VisualDetection(settings.detection)
 
-while camera.is_open():
+    try:
+        camera.open()
+        while True:
+            frame = camera.read()
+            frame_out = processing.process(frame)
 
-    frame = camera.take_pic()
+            cv2.imshow("frame", frame_out)
 
-    frame_out = processing.process(frame)
-    
-    cv2.imshow('frame', frame_out)
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+    except CameraError as exc:
+        print(f"Camera error: {exc}")
+    finally:
+        camera.release()
+        cv2.destroyAllWindows()
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
 
-camera.release()
-cv2.destroyAllWindows()
+if __name__ == "__main__":
+    main()
