@@ -1,4 +1,4 @@
 There is probably a better way to do this rather than a .txt file but it does the job.
 
-To start server: 
-uvicorn server:app --host 0.0.0.0 --port 8000
+To start server from root: 
+uvicorn app.api:app --host 0.0.0.0 --port 8000
