@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spiderlab</title>
+  <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">SL</span><span>Spiderlab</span></div>
+    <nav class="tabs" aria-label="Dashboard sections">
+      <span class="tab active">Live</span>
+      <span class="tab">System</span>
+      <span class="tab">Camera</span>
+      <span class="tab">Process</span>
+      <span class="tab">Linux</span>
+      <span class="tab">Debug</span>
+    </nav>
+    <div class="status-pill" id="worker-state">Booting</div>
+  </header>
+
+  <main class="layout">
+    <section class="panel">
+      <div class="panel-header">
+        <span>Live Visual Detection</span>
+        <span>MJPG /stream.mjpg</span>
+      </div>
+      <div class="feed-wrap">
+        <img class="feed" src="/stream.mjpg" alt="Live camera stream">
+      </div>
+      <div class="feed-footer">
+        <div class="mini-stat">
+          <div class="mini-label">Camera FPS</div>
+          <div class="mini-value" id="fps">--</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-label">Target</div>
+          <div class="mini-value" id="target-fps">--</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-label">Frames</div>
+          <div class="mini-value" id="frames">--</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-label">Uptime</div>
+          <div class="mini-value" id="uptime">--</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="panel">
+        <div class="identity">
+          <div class="avatar">PI</div>
+          <div>
+            <h1>Control Node</h1>
+            <p>Linux camera worker telemetry, process health, and live motion view.</p>
+          </div>
+        </div>
+        <div class="metric-grid">
+          <div class="metric">
+            <div class="metric-label">CPU Temp</div>
+            <div class="metric-value" id="cpu-temp">--</div>
+            <div class="bar"><div class="bar-fill" id="temp-bar"></div></div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">CPU Load</div>
+            <div class="metric-value" id="cpu-percent">--</div>
+            <div class="bar"><div class="bar-fill" id="cpu-bar"></div></div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">RAM Used</div>
+            <div class="metric-value" id="ram-percent">--</div>
+            <div class="bar"><div class="bar-fill" id="ram-bar"></div></div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">App RAM</div>
+            <div class="metric-value" id="app-ram">--</div>
+            <div class="bar"><div class="bar-fill" id="app-ram-bar"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <span>Linux Signals</span>
+          <span>/api/stats</span>
+        </div>
+        <div class="events">
+          <div class="event">
+            <strong>Memory</strong>
+            <span id="memory-detail">Waiting for telemetry</span>
+          </div>
+          <div class="event">
+            <strong>Load Average</strong>
+            <span id="load-average">Waiting for telemetry</span>
+          </div>
+          <div class="event">
+            <strong>Camera Worker</strong>
+            <span id="camera-detail">Waiting for first frame</span>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 import threading
 import time
+from collections import deque
 from threading import Condition
 
 from app.camera import Camera, CameraError
@@ -20,6 +21,7 @@ class CameraWorker(threading.Thread):
         self._condition = Condition()
         self._stop_event = threading.Event()
         self._frame_number = 0
+        self._frame_times = deque(maxlen=90)
         self.H : float | None = None
         self.latest_encoded_jpeg : bytes | None = None
 
@@ -40,6 +42,7 @@ class CameraWorker(threading.Thread):
                 with self._condition:
                     self.latest_encoded_jpeg = encoded_frame
                     self._frame_number += 1
+                    self._frame_times.append(time.perf_counter())
                     self._condition.notify_all()
 
                 execution_time : float = time.perf_counter() - start
@@ -65,3 +68,20 @@ class CameraWorker(threading.Thread):
             if self._frame_number <= last_frame_number:
                 return self._frame_number, None
             return self._frame_number, self.latest_encoded_jpeg
+
+    def get_stats(self) -> dict:
+        with self._condition:
+            frame_times = list(self._frame_times)
+            fps = 0.0
+            if len(frame_times) >= 2:
+                elapsed = frame_times[-1] - frame_times[0]
+                if elapsed > 0:
+                    fps = (len(frame_times) - 1) / elapsed
+
+            return {
+                "running": self.is_alive() and not self._stop_event.is_set(),
+                "frames": self._frame_number,
+                "fps": round(fps, 1),
+                "target_fps": self.settings.camera_worker.fps,
+                "has_frame": self.latest_encoded_jpeg is not None,
+            }
