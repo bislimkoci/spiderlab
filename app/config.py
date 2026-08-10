@@ -20,12 +20,17 @@ class StreamSettings:
     jpeg_quality: int = 85
     boundary: str = "frame"
 
+@dataclass(frozen=True)
+class CameraWorkerSettings:
+    fps : int = 30
+
 
 @dataclass(frozen=True)
 class Settings:
     camera: CameraSettings = CameraSettings()
     detection: DetectionSettings = DetectionSettings()
     stream: StreamSettings = StreamSettings()
+    camera_worker : CameraWorkerSettings = CameraWorkerSettings()
 
 
 settings = Settings()

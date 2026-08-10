@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import cv2
 
-from app.camera import Camera, CameraError
 from app.config import StreamSettings
 
 
@@ -23,11 +22,12 @@ def mjpeg_frame(image_bytes: bytes, boundary: str) -> bytes:
     )
 
 
-def mjpeg_stream(camera: Camera, processor, settings: StreamSettings):
+def mjpeg_stream(camera_worker, settings: StreamSettings):
+    last_frame_number = 0
     while True:
-        try:
-            frame = camera.read()
-            processed_frame = processor.process(frame)
-            yield mjpeg_frame(encode_jpeg(processed_frame, settings), settings.boundary)
-        except CameraError:
+        last_frame_number, image_bytes = camera_worker.get_latest_encoded_jpeg(
+            last_frame_number
+        )
+        if image_bytes is None:
             break
+        yield mjpeg_frame(image_bytes, settings.boundary)
