@@ -2,3 +2,10 @@ There is probably a better way to do this rather than a .txt file but it does th
 
 To start server from root: 
 uvicorn app.api:app --host 0.0.0.0 --port 8000
+
+with tailscale you can run this:
+uvicorn app.api:app --host 127.0.0.1 --port 8000 (probably add this as a background process for your device)
+tailscale serve --bg 8000
+tailscale serve status (to see what serve you have on)
+tailscale serve reset (to remove the serve connection)
+
