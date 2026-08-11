@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import cv2
 
-from app.config import DetectionSettings
+from ultralytics import YOLO
+from app.config import DetectionSettings, PeopleDetectionSettings
 
 
 class VisualDetection:
@@ -53,3 +54,62 @@ class VisualDetection:
                 3,
             )
         return output
+
+
+class PeopleDetection:
+    def __init__(self, settings: PeopleDetectionSettings):
+        self.settings = settings
+       
+        self._model = YOLO(self.settings.model_path)
+
+    def process(self, frame):
+        output = frame.copy()
+        results = self._model.predict(
+            source=frame,
+            classes=[self.settings.person_class_id],
+            conf=self.settings.confidence,
+            verbose=False,
+        )
+        if not results:
+            return output
+
+        boxes = getattr(results[0], "boxes", None)
+        if boxes is None:
+            return output
+
+        for box in boxes:
+            x1, y1, x2, y2 = self._square_bounds(
+                box.xyxy[0].tolist(),
+                frame.shape[:2],
+            )
+            cv2.rectangle(
+                output,
+                (x1, y1),
+                (x2, y2),
+                self.settings.box_color,
+                self.settings.box_thickness,
+            )
+
+        return output
+
+    def _square_bounds(self, xyxy, frame_shape):
+        frame_height, frame_width = frame_shape
+        x1, y1, x2, y2 = (int(round(value)) for value in xyxy)
+        box_width = max(1, x2 - x1)
+        box_height = max(1, y2 - y1)
+        side = min(max(box_width, box_height), frame_width - 1, frame_height - 1)
+
+        center_x = (x1 + x2) // 2
+        center_y = (y1 + y2) // 2
+        square_x1 = center_x - side // 2
+        square_y1 = center_y - side // 2
+
+        square_x1 = max(0, min(square_x1, frame_width - side - 1))
+        square_y1 = max(0, min(square_y1, frame_height - side - 1))
+
+        return (
+            square_x1,
+            square_y1,
+            square_x1 + side,
+            square_y1 + side,
+        )

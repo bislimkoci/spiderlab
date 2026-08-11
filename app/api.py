@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from app.camera import Camera
 from app.camera_worker import CameraWorker
 from app.config import settings
-from app.processing import VisualDetection
+from app.processing import PeopleDetection
 from app.streaming import mjpeg_stream
 from app.system_stats import LinuxSystemStats
 
@@ -18,7 +18,7 @@ STATIC_DIR = BASE_DIR / "static"
 DASHBOARD_FILE = BASE_DIR / "templates" / "dashboard.html"
 
 camera = Camera(settings.camera)
-processor = VisualDetection(settings.detection)
+processor = PeopleDetection(settings.people_detection)
 camera_worker = CameraWorker(camera, processor, settings)
 system_stats = LinuxSystemStats()
 

@@ -4,7 +4,7 @@ import numpy as np
 from app.camera import Camera, CameraError
 from app.camera_worker import CameraWorker
 from app.config import settings
-from app.processing import VisualDetection
+from app.processing import PeopleDetection
 
 
 def decode_jpeg(image_bytes: bytes):
@@ -17,7 +17,7 @@ def decode_jpeg(image_bytes: bytes):
 
 def main() -> None:
     camera = Camera(settings.camera)
-    processor = VisualDetection(settings.detection)
+    processor = PeopleDetection(settings.people_detection)
     camera_worker = CameraWorker(camera, processor, settings)
     worker_started = False
     last_frame_number = 0
