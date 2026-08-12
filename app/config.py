@@ -20,7 +20,7 @@ class PeopleDetectionSettings:
     model_path: str = "yolov8n.pt"
     confidence: float = 0.4
     person_class_id: int = 0
-    box_color: tuple[int, int, int] = (0, 200, 0)
+    box_color: tuple[int, int, int] = (0, 0, 255)
     box_thickness: int = 3
 
 
@@ -35,12 +35,18 @@ class CameraWorkerSettings:
 
 
 @dataclass(frozen=True)
+class ProcessWorkerSettings:
+    fps: int = 1
+
+
+@dataclass(frozen=True)
 class Settings:
     camera: CameraSettings = CameraSettings()
     detection: DetectionSettings = DetectionSettings()
     people_detection: PeopleDetectionSettings = PeopleDetectionSettings()
     stream: StreamSettings = StreamSettings()
     camera_worker : CameraWorkerSettings = CameraWorkerSettings()
+    process_worker: ProcessWorkerSettings = ProcessWorkerSettings()
 
 
 settings = Settings()

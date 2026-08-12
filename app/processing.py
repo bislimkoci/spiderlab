@@ -59,11 +59,12 @@ class VisualDetection:
 class PeopleDetection:
     def __init__(self, settings: PeopleDetectionSettings):
         self.settings = settings
-       
         self._model = YOLO(self.settings.model_path)
 
     def process(self, frame):
-        output = frame.copy()
+        return self.draw_detections(frame, self.detect(frame))
+
+    def detect(self, frame):
         results = self._model.predict(
             source=frame,
             classes=[self.settings.person_class_id],
@@ -71,17 +72,21 @@ class PeopleDetection:
             verbose=False,
         )
         if not results:
-            return output
+            return []
 
         boxes = getattr(results[0], "boxes", None)
         if boxes is None:
-            return output
+            return []
 
+        detections = []
         for box in boxes:
-            x1, y1, x2, y2 = self._square_bounds(
-                box.xyxy[0].tolist(),
-                frame.shape[:2],
-            )
+            detections.append(self._square_bounds(box.xyxy[0].tolist(), frame.shape[:2]))
+
+        return detections
+
+    def draw_detections(self, frame, detections):
+        output = frame.copy()
+        for x1, y1, x2, y2 in detections:
             cv2.rectangle(
                 output,
                 (x1, y1),

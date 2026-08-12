@@ -6,6 +6,7 @@ from threading import Condition
 from app.camera import Camera, CameraError
 from app.config import StreamSettings
 from app.config import Settings
+from app.process_worker import ProcessWorker
 
 from app.streaming import encode_jpeg
 
@@ -16,8 +17,8 @@ class CameraWorker(threading.Thread):
     def __init__(self, camera: Camera, processor, settings: Settings):
         super().__init__(daemon=True)
         self.camera : Camera = camera
-        self.processor = processor
         self.settings : Settings = settings
+        self.process_worker = ProcessWorker(processor, self.settings.process_worker)
         self._condition = Condition()
         self._stop_event = threading.Event()
         self._frame_number = 0
@@ -31,13 +32,17 @@ class CameraWorker(threading.Thread):
             self.H = 1 / self.settings.camera_worker.fps
 
         stream_settings : StreamSettings = self.settings.stream
+        process_worker_started = False
 
         try:
+            self.process_worker.start()
+            process_worker_started = True
             while not self._stop_event.is_set():
                 start : float = time.perf_counter()
 
                 frame = self.camera.read()
-                processed_frame = self.processor.process(frame)
+                self.process_worker.submit(frame)
+                processed_frame = self.process_worker.latest_frame(frame)
                 encoded_frame = encode_jpeg(processed_frame, stream_settings)
                 with self._condition:
                     self.latest_encoded_jpeg = encoded_frame
@@ -53,6 +58,9 @@ class CameraWorker(threading.Thread):
         except CameraError:
             pass
         finally:
+            self.process_worker.stop()
+            if process_worker_started:
+                self.process_worker.join()
             self.stop()
 
     def stop(self) -> None:
@@ -84,4 +92,5 @@ class CameraWorker(threading.Thread):
                 "fps": round(fps, 1),
                 "target_fps": self.settings.camera_worker.fps,
                 "has_frame": self.latest_encoded_jpeg is not None,
+                "processor": self.process_worker.get_stats(),
             }
