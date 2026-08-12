@@ -31,7 +31,7 @@ class StreamSettings:
 
 @dataclass(frozen=True)
 class CameraWorkerSettings:
-    fps : int = 30
+    fps : int = 15
 
 
 @dataclass(frozen=True)
