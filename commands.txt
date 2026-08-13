@@ -9,3 +9,6 @@ tailscale serve --bg 8000
 tailscale serve status (to see what serve you have on)
 tailscale serve reset (to remove the serve connection)
 
+You need to have a webhook on discord or any other service to get notifications.
+Add the URL in app/.env
+
