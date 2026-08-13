@@ -1,2 +1,5 @@
 #ignore pycache in whole project
 **/__pycache__
+
+#env files
+**/.env

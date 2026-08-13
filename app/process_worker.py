@@ -20,6 +20,9 @@ class ProcessWorker(threading.Thread):
         self._process_count = 0
         self._process_times = deque(maxlen=30)
         self._last_error: str | None = None
+        self._person_detected_last_frame = False
+        self._notification_count = 0
+        self._last_notification_error: str | None = None
         self._detect = getattr(self.processor, "detect", None)
         self._draw_detections = getattr(self.processor, "draw_detections", None)
 
@@ -80,12 +83,19 @@ class ProcessWorker(threading.Thread):
                 with self._condition:
                     self._last_error = str(exc)
 
+            should_send_notification = False
             with self._condition:
                 last_sequence = sequence
                 if processed_result is not None:
                     if result_kind == "detections":
                         self._detections = processed_result
                         self._processed_frame = None
+                        person_detected = bool(processed_result)
+                        should_send_notification = (
+                            person_detected
+                            and not self._person_detected_last_frame
+                        )
+                        self._person_detected_last_frame = person_detected
                     else:
                         self._processed_frame = processed_result
                         self._detections = None
@@ -93,6 +103,22 @@ class ProcessWorker(threading.Thread):
                     self._process_times.append(time.perf_counter())
                     self._last_error = None
                 self._condition.notify_all()
+
+            if should_send_notification:
+                self._send_detection_notification()
+
+    def _send_detection_notification(self) -> None:
+        try:
+            from app.notification import send_detection_message_discord
+            if self.settings.notification_on:
+                send_detection_message_discord()
+        except Exception as exc:
+            with self._condition:
+                self._last_notification_error = str(exc)
+        else:
+            with self._condition:
+                self._notification_count += 1
+                self._last_notification_error = None
 
     def stop(self) -> None:
         self._stop_event.set()
@@ -119,4 +145,7 @@ class ProcessWorker(threading.Thread):
                     or self._detections is not None
                 ),
                 "last_error": self._last_error,
+                "person_detected": self._person_detected_last_frame,
+                "notifications": self._notification_count,
+                "last_notification_error": self._last_notification_error,
             }

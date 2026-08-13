@@ -37,6 +37,7 @@ class CameraWorkerSettings:
 @dataclass(frozen=True)
 class ProcessWorkerSettings:
     fps: int = 1
+    notification_on : bool = True
 
 
 @dataclass(frozen=True)
